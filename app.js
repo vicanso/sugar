@@ -2,10 +2,11 @@
 const html = require('./lib/html');
 const co = require('co');
 const fs = require('fs');
-const prettydiff = require('prettydiff');
+const JsDiff = require('diff');
+// const prettydiff = require('prettydiff');
 
 co(function*() {
-  let str = yield html.format('http://test.gf.com.cn/portal/index');
+  let str = fs.readFileSync('./examples/index.html', 'utf8');
   let data = yield html.analyze(str);
   // fs.writeFile('./domTree.json', JSON.stringify(data.tree, null, 2));
   let original = fs.readFileSync('./domTree.json');
@@ -13,15 +14,15 @@ co(function*() {
   let diffHtmlArr = html.getDiffHtml(str, pathsArr);
   let originalHtml = fs.readFileSync('./examples/original.html', 'utf8');
   let originalDiffHtmlArr = html.getDiffHtml(originalHtml, pathsArr);
-  // console.dir(diffHtmlArr);
-  // console.dir(originalDiffHtmlArr);
-  let output = prettydiff.api({
-    source: diffHtmlArr[0],
-    diff: originalDiffHtmlArr[0],
-    lang: 'html'
+  let diff = JsDiff.diffLines(diffHtmlArr[0], originalDiffHtmlArr[0]);
+  // console.dir(str);
+  // console.dir('***************');
+  // console.dir(originalHtml);
+  console.dir(diffHtmlArr[0]);
+  console.dir(originalDiffHtmlArr[0]);
+  diff.forEach(function(part) {
+    console.dir(part);
   });
-  fs.writeFile('./a.html', output);
-  console.dir(output);
 }).catch(function(err) {
   console.error(err.stack);
 });
